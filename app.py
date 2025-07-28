@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-
 load_dotenv()
 
 """
@@ -15,25 +14,20 @@ Streamlit アプリケーション
 
 1. 画面のテキストエリアに質問内容を入力します。
 2. ラジオボタンから希望する専門家を選択します（料理、法律、旅行）。
-3. "送信" ボタンを押すと、選択された分野の専門家として LLM が回答を生成し、画面上に表示します。
+3. "送信" ボタンを押すと、選択された分野の専門家として LLＭ が回答を生成し、
+   画面上に表示します。
 
-このコードでは、Lesson8 で取り扱った LangChain のシンプルな使い方を参考に、
-`ChatPromptTemplate` と `LLMChain` を組み合わせて使用しています。専門家の
-タイプによって異なるシステムメッセージが適用されるため、同じ質問でも違う
-視点からの回答を得ることができます。
+専門家の視点からの回答を得ることができます。
 """
-
 
 import streamlit as st
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import LLMChain
-from langchain.schema import SystemMessage, HumanMessage
 
+# Streamlitページ設定: 最初に呼び出す必要があります
+st.set_page_config(page_title="専門家に質問できるAIアプリ", page_icon="🤖")
 
-
-# グローバルで LLM インスタンスを初期化
-llm = ChatOpenAI(temperature=0)
 
 def get_llm_response(question: str, expert: str) -> str:
     """
@@ -85,11 +79,10 @@ def get_llm_response(question: str, expert: str) -> str:
 
     # LLM とチェーンを初期化
     # モデル名を指定しない場合、環境変数に基づくデフォルト (gpt-3.5-turbo など) が使用されます。
-    # 質問をパラメータに渡してモデルを実行
-    # テンプレートの変数名が {question} なので、キーも "question" にする
+    llm = ChatOpenAI(temperature=0)
     chain = LLMChain(llm=llm, prompt=prompt)
-    response = chain.run({"question": question})
-    return response
+
+    # 質問をパラメータに渡してモデルを実行
     response = chain.run({"question": question})
     return response
 
@@ -99,7 +92,6 @@ def main() -> None:
     Streamlit アプリのエントリポイント。
     ユーザーの入力を受け取り、専門家の種類に応じて LLＭ の回答を表示します。
     """
-    st.set_page_config(page_title="専門家に質問できるAIアプリ", page_icon="🤖")
     st.title("専門家に質問できるAIアプリ")
     st.markdown(
         """
@@ -135,14 +127,13 @@ def main() -> None:
             with st.spinner("AI が回答を生成しています…"):
                 try:
                     answer = get_llm_response(user_question, expert_type)
+                except Exception:
+                    st.error(
+                        "回答の生成中にエラーが発生しました。API キーの設定やネットワーク環境をご確認ください。"
+                    )
+                else:
                     st.markdown("### 回答")
                     st.write(answer)
-                except Exception as e:
-                    # API キー未設定、ネットワーク障害、LangChain のエラーなどが発生する可能性があります
-                    st.error(
-                        "回答の生成中にエラーが発生しました。API キーの設定やネットワーク環境をご確認ください。\n"
-                        "An error occurred while generating the answer. Please check your API key settings and network environment."
-                    )
 
 
 if __name__ == "__main__":
