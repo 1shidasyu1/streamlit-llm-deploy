@@ -1,5 +1,4 @@
-from dotenv import load_dotenv
-load_dotenv()
+
 
 """
 Streamlit アプリケーション
@@ -17,13 +16,19 @@ Streamlit アプリケーション
 3. "送信" ボタンを押すと、選択された分野の専門家として LLＭ が回答を生成し、
    画面上に表示します。
 
-専門家の視点からの回答を得ることができます。
+このコードでは、Lesson8 で取り扱った LangChain のシンプルな使い方を参考に、
+`ChatPromptTemplate` と `LLMChain` を組み合わせて使用しています。専門家の
+タイプによって異なるシステムメッセージが適用されるため、同じ質問でも違う
+視点からの回答を得ることができます。
 """
 
 import streamlit as st
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import LLMChain
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Streamlitページ設定: 最初に呼び出す必要があります
 st.set_page_config(page_title="専門家に質問できるAIアプリ", page_icon="🤖")
@@ -79,7 +84,7 @@ def get_llm_response(question: str, expert: str) -> str:
 
     # LLM とチェーンを初期化
     # モデル名を指定しない場合、環境変数に基づくデフォルト (gpt-3.5-turbo など) が使用されます。
-    llm = ChatOpenAI(temperature=0)
+    llm = ChatOpenAI(model_name="gpt-4o-mini",temperature=0.5)
     chain = LLMChain(llm=llm, prompt=prompt)
 
     # 質問をパラメータに渡してモデルを実行
@@ -138,4 +143,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-    
